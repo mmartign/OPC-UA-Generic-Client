@@ -7,3 +7,5 @@ to get BOOL, (U)INT16, (U)INT32, (U)INT64, FLOAT, DOUBLE, STRING variable.
 This communication utility is used in all Spazio IT Industry 4.0 solutions, see:
 https://www.spazioit.com/pages_en/sol_inf_en/industry-4-0-spazio-it-en/
 
+This work is licensed under a Creative Commons CCZero 1.0 Universal License.
+See https://creativecommons.org/publicdomain/zero/1.0/ for more information.
