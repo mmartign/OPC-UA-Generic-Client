@@ -149,13 +149,13 @@ int main(int argc, char *argv[])
         val->type == ptype) {
         if (strcmp(argv[4], "BOOL") == 0) {
             valueBoolean = *(UA_Boolean *)val->data;
-            printf("The value is %d.\n", valueBoolean);
-            fprintf(fw, "%d\n", valueBoolean);
+            printf("The value is %hhu.\n", valueBoolean);
+            fprintf(fw, "%hhu\n", valueBoolean);
         }
         else if (strcmp(argv[4], "INT16") == 0) {
             valueInt16 = *(UA_Int16 *)val->data;
-            printf("The value is %d.\n", valueInt16);
-            fprintf(fw, "%d\n", valueInt16);
+            printf("The value is %hd.\n", valueInt16);
+            fprintf(fw, "%hd\n", valueInt16);
         }
         else if (strcmp(argv[4], "INT32") == 0) {
             valueInt32 = *(UA_Int32 *)val->data;
@@ -169,13 +169,13 @@ int main(int argc, char *argv[])
         }
         else if (strcmp(argv[4], "UINT16") == 0) {
             valueUInt16 = *(UA_UInt16 *)val->data;
-            printf("The value is %u.\n", valueUInt16);
-            fprintf(fw, "%d\n", valueInt16);
+            printf("The value is %hu.\n", valueUInt16);
+            fprintf(fw, "%hu\n", valueInt16);
         }
         else if (strcmp(argv[4], "UINT32") == 0) {
             valueUInt32 = *(UA_UInt32 *)val->data;
             printf("The value is %u.\n", valueUInt32);
-            fprintf(fw, "%d\n", valueInt32);
+            fprintf(fw, "%u\n", valueInt32);
         }
         else if (strcmp(argv[4], "UINT64") == 0) {
             valueUInt64 = *(UA_UInt64 *)val->data;
