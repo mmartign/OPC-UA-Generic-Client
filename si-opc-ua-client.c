@@ -1,5 +1,5 @@
 /*
- * This work has been written on the 16th March 2020 by M. Martignano
+ * This work has been written on the 17th March 2020 by M. Martignano
  * affiliated to Spazio IT - Soluzioni Informatiche s.a.s.
  * See https://www.spazioit.com for more information.
  *
@@ -60,7 +60,7 @@ void usage(const char *error) {
     }
     fprintf(stderr, "Usage:\n");
     fprintf(stderr, "  %s <OPC-UA Server URL> <-r|-w> <Name Space Index> <Node Id> <Type> [<Value>]\n", MY_SELF);
-    fprintf(stderr, "valid types are: BOOL, (U)INT16, (U)INT32, (U)INT64, FLOAT, DOUBLE, STRING;\n");
+    fprintf(stderr, "valid types are: BOOL, (S)BYTE, (U)INT16, (U)INT32, (U)INT64, FLOAT, DOUBLE, STRING;\n");
     fprintf(stderr, "example:\n");
     fprintf(stderr, "  %s http://localhost:4840 -r  1 \"the.answer\" STRING\n", MY_SELF);
     fprintf(stderr, "or:\n");
@@ -102,9 +102,11 @@ int main(int argc, char *argv[]) {
 
     int ns = 0;
     UA_Boolean valueBoolean = 0;
+    UA_SByte valueSByte = 0;
     UA_Int16 valueInt16 = 0;
     UA_Int32 valueInt32 = 0;
     UA_Int64 valueInt64 = 0;
+    UA_Byte valueByte = 0;
     UA_UInt16 valueUInt16 = 0;
     UA_UInt32 valueUInt32 = 0;
     UA_UInt64 valueUInt64 = 0;
@@ -121,12 +123,16 @@ int main(int argc, char *argv[]) {
     /* Read attribute */
     if (strcmp(argv[5], "BOOL") == 0) {
         ptype = &UA_TYPES[UA_TYPES_BOOLEAN];
+    } else if (strcmp(argv[5], "SBYTE") == 0) {
+        ptype = &UA_TYPES[UA_TYPES_SBYTE];
     } else if (strcmp(argv[5], "INT16") == 0) {
         ptype = &UA_TYPES[UA_TYPES_INT16];
     } else if (strcmp(argv[5], "INT32") == 0) {
         ptype = &UA_TYPES[UA_TYPES_INT32];
     } else if (strcmp(argv[5], "INT64") == 0) {
         ptype = &UA_TYPES[UA_TYPES_INT64];
+    } else if (strcmp(argv[5], "BYTE") == 0) {
+        ptype = &UA_TYPES[UA_TYPES_BYTE];
     } else if (strcmp(argv[5], "UINT16") == 0) {
         ptype = &UA_TYPES[UA_TYPES_UINT16];
     } else if (strcmp(argv[5], "UINT32") == 0) {
@@ -160,6 +166,10 @@ int main(int argc, char *argv[]) {
                 valueBoolean = *(UA_Boolean *)val->data;
                 printf("%hhu\n", valueBoolean);
                 fprintf(stderr, "READ: %hhu\n", valueBoolean);
+            } else if (strcmp(argv[5], "SBYTE") == 0) {
+                valueSByte = *(UA_SByte *)val->data;
+                printf("%hhd\n", valueSByte);
+                fprintf(stderr, "READ: %hhd\n", valueSByte);
             } else if (strcmp(argv[5], "INT16") == 0) {
                 valueInt16 = *(UA_Int16 *)val->data;
                 printf("%hd\n", valueInt16);
@@ -172,6 +182,10 @@ int main(int argc, char *argv[]) {
                 valueInt64 = *(UA_Int64 *)val->data;
                 printf("%lld\n", valueInt64);
                 fprintf(stderr, "READ: %lld\n", valueInt64);
+            } else if (strcmp(argv[5], "BYTE") == 0) {
+                valueByte = *(UA_Byte *)val->data;
+                printf("%hhu\n", valueByte);
+                fprintf(stderr, "READ: %hhu\n", valueByte);
             } else if (strcmp(argv[5], "UINT16") == 0) {
                 valueUInt16 = *(UA_UInt16 *)val->data;
                 printf("%hu\n", valueUInt16);
@@ -208,7 +222,22 @@ int main(int argc, char *argv[]) {
                     UA_Variant_setScalarCopy(val, &value, &UA_TYPES[UA_TYPES_BOOLEAN]);
                     retval = UA_Client_writeValueAttribute(client, UA_NODEID_STRING(ns, argv[4]), val);
                     if (retval == UA_STATUSCODE_GOOD) {
-                        fprintf(stderr, "WROTE: %lf\n", value);
+                        fprintf(stderr, "WROTE: %hhu\n", value);
+                    } else {
+                        fprintf(stderr, "XXX_NOWRITE\n"); 
+                        result = XXX_NOWRITE;
+                    }
+                } else {
+                    usage("WRONG_CONSOLE_READ");
+                    result = WRONG_CONSOLE_READ;
+                }
+            } else if (strcmp(argv[5], "SBYTE") == 0) {
+                UA_SByte value;
+                if (sscanf_s(argv[6], "%hhd", &value) == 1) {
+                    UA_Variant_setScalarCopy(val, &value, &UA_TYPES[UA_TYPES_SBYTE]);
+                    retval = UA_Client_writeValueAttribute(client, UA_NODEID_STRING(ns, argv[4]), val);
+                    if (retval == UA_STATUSCODE_GOOD) {
+                        fprintf(stderr, "WROTE: %hhd\n", value);
                     } else {
                         fprintf(stderr, "XXX_NOWRITE\n"); 
                         result = XXX_NOWRITE;
@@ -223,7 +252,7 @@ int main(int argc, char *argv[]) {
                     UA_Variant_setScalarCopy(val, &value, &UA_TYPES[UA_TYPES_INT16]);
                     retval = UA_Client_writeValueAttribute(client, UA_NODEID_STRING(ns, argv[4]), val);
                     if (retval == UA_STATUSCODE_GOOD) {
-                        fprintf(stderr, "WROTE: %lf\n", value);
+                        fprintf(stderr, "WROTE: %hd\n", value);
                     } else {
                         fprintf(stderr, "XXX_NOWRITE\n"); 
                         result = XXX_NOWRITE;
@@ -238,7 +267,7 @@ int main(int argc, char *argv[]) {
                     UA_Variant_setScalarCopy(val, &value, &UA_TYPES[UA_TYPES_INT32]);
                     retval = UA_Client_writeValueAttribute(client, UA_NODEID_STRING(ns, argv[4]), val);
                     if (retval == UA_STATUSCODE_GOOD) {
-                        fprintf(stderr, "WROTE: %lf\n", value);
+                        fprintf(stderr, "WROTE: %d\n", value);
                     } else {
                         fprintf(stderr, "XXX_NOWRITE\n"); 
                         result = XXX_NOWRITE;
@@ -253,7 +282,22 @@ int main(int argc, char *argv[]) {
                     UA_Variant_setScalarCopy(val, &value, &UA_TYPES[UA_TYPES_INT64]);
                     retval = UA_Client_writeValueAttribute(client, UA_NODEID_STRING(ns, argv[4]), val);
                     if (retval == UA_STATUSCODE_GOOD) {
-                        fprintf(stderr, "WROTE: %lf\n", value);
+                        fprintf(stderr, "WROTE: %lld\n", value);
+                    } else {
+                        fprintf(stderr, "XXX_NOWRITE\n"); 
+                        result = XXX_NOWRITE;
+                    }
+                } else {
+                    usage("WRONG_CONSOLE_READ");
+                    result = WRONG_CONSOLE_READ;
+                }
+            } else if (strcmp(argv[5], "BYTE") == 0) {
+                UA_Byte value;
+                if (sscanf_s(argv[6], "%hhu", &value) == 1) {
+                    UA_Variant_setScalarCopy(val, &value, &UA_TYPES[UA_TYPES_BYTE]);
+                    retval = UA_Client_writeValueAttribute(client, UA_NODEID_STRING(ns, argv[4]), val);
+                    if (retval == UA_STATUSCODE_GOOD) {
+                        fprintf(stderr, "WROTE: %hhu\n", value);
                     } else {
                         fprintf(stderr, "XXX_NOWRITE\n"); 
                         result = XXX_NOWRITE;
@@ -264,11 +308,11 @@ int main(int argc, char *argv[]) {
                 }
             } else if (strcmp(argv[5], "UINT16") == 0) {
                 UA_UInt16 value;
-                if (sscanf_s(argv[6], "%f", &value) == 1) {
+                if (sscanf_s(argv[6], "%hu", &value) == 1) {
                     UA_Variant_setScalarCopy(val, &value, &UA_TYPES[UA_TYPES_UINT16]);
                     retval = UA_Client_writeValueAttribute(client, UA_NODEID_STRING(ns, argv[4]), val);
                     if (retval == UA_STATUSCODE_GOOD) {
-                        fprintf(stderr, "WROTE: %lf\n", value);
+                        fprintf(stderr, "WROTE: %hu\n", value);
                     } else {
                         fprintf(stderr, "XXX_NOWRITE\n"); 
                         result = XXX_NOWRITE;
@@ -283,7 +327,7 @@ int main(int argc, char *argv[]) {
                     UA_Variant_setScalarCopy(val, &value, &UA_TYPES[UA_TYPES_UINT32]);
                     retval = UA_Client_writeValueAttribute(client, UA_NODEID_STRING(ns, argv[4]), val);
                     if (retval == UA_STATUSCODE_GOOD) {
-                        fprintf(stderr, "WROTE: %lf\n", value);
+                        fprintf(stderr, "WROTE: %u\n", value);
                     } else {
                         fprintf(stderr, "XXX_NOWRITE\n"); 
                         result = XXX_NOWRITE;
@@ -298,7 +342,7 @@ int main(int argc, char *argv[]) {
                     UA_Variant_setScalarCopy(val, &value, &UA_TYPES[UA_TYPES_UINT64]);
                     retval = UA_Client_writeValueAttribute(client, UA_NODEID_STRING(ns, argv[4]), val);
                     if (retval == UA_STATUSCODE_GOOD) {
-                        fprintf(stderr, "WROTE: %lf\n", value);
+                        fprintf(stderr, "WROTE: %llu\n", value);
                     } else {
                         fprintf(stderr, "XXX_NOWRITE\n"); 
                         result = XXX_NOWRITE;
@@ -313,7 +357,7 @@ int main(int argc, char *argv[]) {
                     UA_Variant_setScalarCopy(val, &value, &UA_TYPES[UA_TYPES_FLOAT]);
                     retval = UA_Client_writeValueAttribute(client, UA_NODEID_STRING(ns, argv[4]), val);
                     if (retval == UA_STATUSCODE_GOOD) {
-                        fprintf(stderr, "WROTE: %lf\n", value);
+                        fprintf(stderr, "WROTE: %f\n", value);
                     } else {
                         fprintf(stderr, "XXX_NOWRITE\n"); 
                         result = XXX_NOWRITE;
