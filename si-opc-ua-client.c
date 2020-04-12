@@ -62,9 +62,9 @@ void usage(const char *error) {
     fprintf(stderr, "  %s <OPC-UA Server URL> <-r|-w> <Name Space Index> <Node Id> <Type> [<Value>]\n", MY_SELF);
     fprintf(stderr, "valid types are: BOOL, (S)BYTE, (U)INT16, (U)INT32, (U)INT64, FLOAT, DOUBLE, STRING;\n");
     fprintf(stderr, "example:\n");
-    fprintf(stderr, "  %s http://localhost:4840 -r  1 \"the.answer\" STRING\n", MY_SELF);
+    fprintf(stderr, "  %s opc.tcp://localhost:4840 -r  1 \"the.answer\" STRING\n", MY_SELF);
     fprintf(stderr, "or:\n");
-    fprintf(stderr, "  %s http://localhost:4840 -w  1 \"the.answer\" STRING \"42\"\n", MY_SELF);
+    fprintf(stderr, "  %s opc.tcp://localhost:4840 -w  1 \"the.answer\" STRING \"42\"\n", MY_SELF);
 }
 
 int main(int argc, char *argv[]) {
@@ -85,19 +85,6 @@ int main(int argc, char *argv[]) {
     if (argc == 7 && strcmp(argv[2], "-w") != 0) {
         usage("WRONG_ARGUMENTS_COUNT_FOR_OPERATION");
         return WRONG_ARGUMENTS_COUNT_FOR_OPERATION;
-    }
-
-    UA_Client *client = UA_Client_new();
-    UA_ClientConfig_setDefault(UA_Client_getConfig(client));
-
-    /* Connect to a server */
-    /* anonymous connect would be: retval = UA_Client_connect(client, "opc.tcp://localhost:4840"); */
-    // UA_StatusCode retval = UA_Client_connect_username(client, "opc.tcp://localhost:4840", "user", "password");
-    UA_StatusCode retval = UA_Client_connect(client, argv[1]);
-    if (retval != UA_STATUSCODE_GOOD) {
-        UA_Client_delete(client);
-        usage("WRONG_CONNECTION");
-        return WRONG_CONNECTION;
     }
 
     int ns = 0;
@@ -149,12 +136,26 @@ int main(int argc, char *argv[]) {
         usage("WRONG_TYPE");
         return WRONG_TYPE;
     }
+
+    UA_Client *client = UA_Client_new();
+    UA_ClientConfig_setDefault(UA_Client_getConfig(client));
+
+    /* Connect to a server */
+    /* anonymous connect would be: retval = UA_Client_connect(client, "opc.tcp://localhost:4840"); */
+    // UA_StatusCode retval = UA_Client_connect_username(client, "opc.tcp://localhost:4840", "user", "password");
+    UA_StatusCode retval = UA_Client_connect(client, argv[1]);
+    if (retval != UA_STATUSCODE_GOOD) {
+        UA_Client_delete(client);
+        fprintf(stderr, "WRONG_CONNECTION\n");
+        return WRONG_CONNECTION;
+    }
+
     UA_Variant *val = UA_Variant_new();
    if (strcmp(argv[2], "-r") == 0) {
         retval = UA_Client_readValueAttribute(client, UA_NODEID_STRING(ns, argv[4]), val);
         if (val->data == (void *)NULL) {
             printf("XXX_NOVALUE\n");
-            fprintf(stderr, "XXX_NOVALUE\n");
+            fprintf(stderr, "READ: XXX_NOVALUE\n");
             goto end;
         }
         if (val->type != ptype) {
@@ -388,7 +389,7 @@ int main(int argc, char *argv[]) {
                 if (retval == UA_STATUSCODE_GOOD) {
                     fprintf(stderr, "WROTE: %s\n", argv[6]);
                 } else {
-                    fprintf(stderr, "XXX_NOWRITE\n", retval); 
+                    fprintf(stderr, "XXX_NOWRITE\n"); 
                     result = XXX_NOWRITE;
                 }
             }
