@@ -48,6 +48,7 @@ static UA_StatusCode nodeIter(UA_NodeId childId, UA_Boolean isInverse, UA_NodeId
 #define WRONG_STR50_LENGTH -8
 #define WRONG_CONSOLE_READ -9
 #define WRONG_CONNECTION -10
+#define XXX_NOT_ENOUGH_MEMORY -1
 
 #define MY_SELF "si-opc-ua-client"
 
@@ -155,7 +156,7 @@ int main(int argc, char *argv[]) {
         retval = UA_Client_readValueAttribute(client, UA_NODEID_STRING(ns, argv[4]), val);
         if (val->data == (void *)NULL) {
             printf("XXX_NOVALUE\n");
-            fprintf(stderr, "READ: XXX_NOVALUE\n");
+            fprintf(stderr, "XXX_NOVALUE\n");
             goto end;
         }
         if (val->type != ptype) {
@@ -209,8 +210,21 @@ int main(int argc, char *argv[]) {
                 fprintf(stderr, "READ: %lf\n", valueDouble);
             } else if (strcmp(argv[5], "STRING") == 0) {
                 ptrValueString = (UA_String *)val->data;
-                printf("%s\n", ptrValueString->data);
-                fprintf(stderr, "READ: %s\n", ptrValueString->data);
+                UA_Byte * tBuf = malloc(ptrValueString->length + 1);
+                if (tBuf == (UA_Byte *) NULL) {
+                    printf("XXX_NOT_ENOUGH_MEMORY\n");
+                    fprintf(stderr, "XXX_NOT_ENOUGH_MEMORY\n");
+                    result = XXX_NOT_ENOUGH_MEMORY;
+
+                } else {
+                    for (int i = 0; i <= ptrValueString->length; i++) {
+                        tBuf[i] = ptrValueString->data[i];
+                    }
+                    tBuf[ptrValueString->length] = 0;
+                    printf("%s\n", tBuf);
+                    fprintf(stderr, "READ: %s\n", tBuf);
+                    free(tBuf);
+                }
             }
         } else {
             printf("XXX_NOVALUE\n");
